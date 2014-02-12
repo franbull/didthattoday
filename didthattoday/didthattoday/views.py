@@ -4,32 +4,22 @@ from pyramid.view import view_config
 from sqlalchemy.exc import DBAPIError
 
 from .models import (
-    DBSession,
-    MyModel,
+    Habit,
     )
 
 
 @view_config(route_name='home', renderer='templates/mytemplate.pt')
 def my_view(request):
-    try:
-        one = DBSession.query(MyModel).filter(MyModel.name == 'one').first()
-    except DBAPIError:
-        return Response(conn_err_msg, content_type='text/plain', status_int=500)
-    return {'one': one, 'project': 'didthattoday'}
+    return {'one': 'oh no', 'project': 'didthattoday'}
 
-conn_err_msg = """\
-Pyramid is having a problem using your SQL database.  The problem
-might be caused by one of the following things:
+@view_config(route_name='habits', renderer='json')
+def habits(request):
+    return {'habits': [h.to_json() for h in Habit.Session.query(Habit).all()]}
 
-1.  You may need to run the "initialize_didthattoday_db" script
-    to initialize your database tables.  Check your virtual 
-    environment's "bin" directory for this script and try to run it.
-
-2.  Your database server may not be running.  Check that the
-    database server referred to by the "sqlalchemy.url" setting in
-    your "development.ini" file is running.
-
-After you fix the problem, please restart the Pyramid application to
-try it again.
-"""
+@view_config(route_name='add_habit', renderer='json', request_method='POST')
+def post_habit(request):
+    habit_dict = request.json_body
+    habit = Habit(**habit_dict)
+    Habit.Session.add(habit)
+    return habit.to_json()
 
