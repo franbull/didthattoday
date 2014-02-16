@@ -10,6 +10,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 from didthattoday.models import DBSession
 from didthattoday.models import Base  # base declarative object
+from didthattoday.models import Habit
 from didthattoday import main
 import os
 here = os.path.dirname(__file__)
@@ -30,7 +31,15 @@ class BaseTestCase(unittest.TestCase):
         # bind an individual Session to the connection
         DBSession.configure(bind=connection)
         self.session = self.Session(bind=connection)
-        Base.session = self.session
+        Base.Session = self.session
+
+    def tearDown(self):
+        # rollback - everything that happened with the
+        # Session above (including calls to commit())
+        # is rolled back.
+        testing.tearDown()
+        self.trans.rollback()
+        self.session.close()
 
 class UnitTestBase(BaseTestCase):
     def setUp(self):
