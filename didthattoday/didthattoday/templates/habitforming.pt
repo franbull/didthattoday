@@ -70,15 +70,15 @@
                 $.getJSON("/habits", function (data) {
                     data.habits.forEach(function (habit) {
                         habits.push(createHabit(habit.name, habit.description));
-                        console.log("Called")
-                    })
-                })
+                    });
+                });
                 return {
                     newHabitName: newHabitName,
                     newHabitDescription: newHabitDescription,
                     habits : habits,
                     addHabit: function () {
-                        habits.push(createHabit(newHabitName(), newHabitDescription()))
+                        var habit = createHabit(newHabitName(), newHabitDescription())
+                        habits.push(habit))
                     }
                 }
             }
