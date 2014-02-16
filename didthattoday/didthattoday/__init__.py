@@ -20,5 +20,6 @@ def main(global_config, **settings):
     config.add_route('habits', '/habits')
     config.add_route('habit', '/habit/{id}')
     config.add_route('add_habit', '/habit')
+    config.add_route('summary', '/summary')
     config.scan()
     return config.make_wsgi_app()

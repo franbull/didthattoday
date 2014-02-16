@@ -1,0 +1,37 @@
+<html>
+<script src="${request.static_url('didthattoday:static/knockout.js')}"></script>
+<H1>
+Yo momma is habit forming
+</H1>
+
+<h2>Add habit</h2>
+<input data-bind="value: newHabitName" />
+<button data-bind="click: addHabit">Add habit</button>
+
+
+<h2>Habits you are building</h2>
+
+<ul data-bind="foreach: habits">
+    <li data-bind="text: name"></li>
+</ul>
+
+<script>
+    function habit(name) {
+        return { name:name };
+    }
+
+    function habitViewModel() {
+        var habits = ko.observableArray([ habit("First"), habit("Second") ]),
+            newHabitName = ko.observable("");
+
+        return {
+            newHabitName: newHabitName,
+            habits : habits,
+            addHabit: function () {habits.push(habit(newHabitName))}
+        }
+    }
+
+    ko.applyBindings(habitViewModel());
+</script>
+
+</html>
