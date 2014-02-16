@@ -77,8 +77,9 @@
                     newHabitDescription: newHabitDescription,
                     habits : habits,
                     addHabit: function () {
-                        var habit = createHabit(newHabitName(), newHabitDescription())
-                        habits.push(habit))
+                        var habit = {name: newHabitName(), description: newHabitDescription()},
+                            displayHabit = createHabit(newHabitName(), newHabitDescription());
+                        $.post('/habit',ko.toJSON(habit), function () { habits.push(displayHabit); });
                     }
                 }
             }
