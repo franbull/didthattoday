@@ -1,37 +1,89 @@
 <html>
-<script src="${request.static_url('didthattoday:static/knockout.js')}"></script>
-<H1>
-Yo momma is habit forming
-</H1>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link href="${request.static_url('didthattoday:static/bootstrap-3.1.1/css/bootstrap.min.css')}" rel="stylesheet">
+    </head>
+    <body>
+        <script src="${request.static_url('didthattoday:static/knockout.js')}"></script>
+        <script src="${request.static_url('didthattoday:static/jquery2.1.0.js')}"></script>
+        <script src="${request.static_url('didthattoday:static/bootstrap-3.1.1/js/bootstrap.min.js')}"></script>
+        <div class="navbar navbar-inverse navbar-static-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Habit Forming</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="#">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div><!--/.nav-collapse -->
+            </div>
+        </div>
 
-<h2>Add habit</h2>
-<input data-bind="value: newHabitName" />
-<button data-bind="click: addHabit">Add habit</button>
+        <div class ='container' role = "main">
 
+                <h1>
+                    Do something useful
+                </h1>
 
-<h2>Habits you are building</h2>
+                <h2>Add habit</h2>
 
-<ul data-bind="foreach: habits">
-    <li data-bind="text: name"></li>
-</ul>
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Habit Name" data-bind="value: newHabitName">
+            </div>
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Habit description" data-bind="value: newHabitDescription">
+            </div>
+            <button data-bind="click: addHabit" class="btn btn-default" type="button">Add</button>
 
-<script>
-    function habit(name) {
-        return { name:name };
-    }
+            <h2>Habits you are building</h2>
+            <ul data-bind="foreach: habits">
+                <li><div data-bind="text: forDisplay"/></li>
+            </ul>
 
-    function habitViewModel() {
-        var habits = ko.observableArray([ habit("First"), habit("Second") ]),
-            newHabitName = ko.observable("");
+        </div>
 
-        return {
-            newHabitName: newHabitName,
-            habits : habits,
-            addHabit: function () {habits.push(habit(newHabitName))}
-        }
-    }
+        <script>
+            function createHabit(name, description) {
+                return {
+                    name: name,
+                    description: description,
+                    forDisplay: "Name: " + name + " Description: " + description
+                };
+            }
 
-    ko.applyBindings(habitViewModel());
-</script>
+            function habitViewModel() {
+                var habits = ko.observableArray(),
+                    newHabitName = ko.observable(""),
+                    newHabitDescription = ko.observable("");
 
+                $.getJSON("/habits", function (data) {
+                    data.habits.forEach(function (habit) {
+                        habits.push(createHabit(habit.name, habit.description));
+                        console.log("Called")
+                    })
+                })
+                return {
+                    newHabitName: newHabitName,
+                    newHabitDescription: newHabitDescription,
+                    habits : habits,
+                    addHabit: function () {
+                        habits.push(createHabit(newHabitName(), newHabitDescription()))
+                    }
+                }
+            }
+
+            ko.applyBindings(habitViewModel());
+        </script>
+    </body>
 </html>
