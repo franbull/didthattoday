@@ -1,9 +1,13 @@
 $(document).ready(function() {
     function createHabit(name, description) {
+        var editing = ko.observable(false),
+            toggleEditMode = function() { editing(!editing()); };
         return {
             name: name,
             description: description,
-            forDisplay: "Name: " + name + " Description: " + description
+            editing: editing,
+            toggleEditMode: toggleEditMode,
+            updateHabit: function () { toggleEditMode(); }
         };
     }
 
@@ -24,7 +28,7 @@ $(document).ready(function() {
             addHabit: function () {
                 var habit = {name: newHabitName(), description: newHabitDescription()},
                     displayHabit = createHabit(newHabitName(), newHabitDescription());
-                $.post('/habit',ko.toJSON(habit), function () { habits.push(displayHabit); });
+                $.post('/habit', ko.toJSON(habit), function () { habits.push(displayHabit); });
             }
         };
     }
