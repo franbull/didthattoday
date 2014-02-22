@@ -13,7 +13,8 @@ from pyramid.scripts.common import parse_vars
 
 from ..models import (
     Base, Habit,
-    DBSession)
+    User,
+    )
 
 
 def usage(argv):
@@ -32,8 +33,9 @@ def main(argv=sys.argv):
     setup_logging(config_uri)
     settings = get_appsettings(config_uri, options=options)
     engine = engine_from_config(settings, 'sqlalchemy.')
-    DBSession.configure(bind=engine)
+    Base.Session.configure(bind=engine)
     Base.metadata.create_all(engine)
     with transaction.manager:
-        model = Habit(name="Don't smoke", id='2', description='A really rad thing')
-        DBSession.add(model)
+        user = User(login='woo', password='hoo')
+        user.habits.append(Habit(name="Don't smoke", description='A really rad thing'))
+        Base.Session.add(user)

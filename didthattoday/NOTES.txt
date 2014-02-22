@@ -1,6 +1,17 @@
 Yoyoyo notes.
 
+TODO JIM there was a line added to development.ini that you'll need
+also you're going to need to rerun the initializedb script
+
 TODO Editing needs a cancel, possibly also stop editing if you click in somewhere else?
 TODO need users, roles, acl
 TODO investigate cornice, or don't seeing as it seems to be badly documented?
+TODO bcrypt not sha1 for passwords?
+TODO login stuff should be in the one page app?
+TODO models to separate files
+TODO using user to get habits not fully completed (not in PUT for example)
+TODO erroring appropriately not implemented if no user
+TODO redirect to login if we're trying to get habits and we're not logged in?
+TODO add authorization for habit and behavior GET
+TODO Step -> Behaviour
 

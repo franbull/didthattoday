@@ -10,7 +10,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 from didthattoday.models import DBSession
 from didthattoday.models import Base  # base declarative object
-from didthattoday.models import Habit
+from didthattoday.models import User
 from didthattoday import main
 import os
 here = os.path.dirname(__file__)
@@ -120,9 +120,13 @@ class IntegrationTestBase(BaseTestCase):
         super(IntegrationTestBase, cls).setUpClass()
 
     def setUp(self):
-        self.app = TestApp(self.app)
-        self.config = testing.setUp()
         super(IntegrationTestBase, self).setUp()
+        user = User('unittestuser', 'sdf987saLKJTEWJ9(*hsd')
+        self.user = user
+        self.session.add(user)
+        self.session.flush()
+        self.app = TestApp(self.app, extra_environ={'unittest_user_id': str(self.user.id)})
+        self.config = testing.setUp()
 
 
 

@@ -2,6 +2,7 @@ import simplejson
 
 from base import IntegrationTestBase
 from didthattoday.models import Habit
+from didthattoday.models import User
 
 class TestHabitViews(IntegrationTestBase):
     def test_habits(self):

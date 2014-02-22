@@ -1,9 +1,13 @@
 from base import BaseTestCase
 from didthattoday.models import Habit
+from didthattoday.models import User
 
 class TestHabit(BaseTestCase):
     def test_create(self):
-        h = Habit(name='woo', description='hoo')
+        u = User('a', 'b')
+        self.session.add(u)
+        self.session.flush()
+        h = Habit(name='woo', description='hoo', userid=u.id)
         self.session.add(h)
         self.session.flush()
         assert(h.id is not None)
