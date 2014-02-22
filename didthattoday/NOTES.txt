@@ -1,0 +1,6 @@
+Yoyoyo notes.
+
+TODO Editing needs a cancel, possibly also stop editing if you click in somewhere else?
+TODO need users, roles, acl
+TODO investigate cornice, or don't seeing as it seems to be badly documented?
+

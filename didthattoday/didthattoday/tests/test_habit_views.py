@@ -55,7 +55,7 @@ class TestHabitViews(IntegrationTestBase):
 
         id = habit['id']
         habit['name'] = 'coo'
-        res = self.app.post('/habit/%s' % id, simplejson.dumps(habit))
+        res = self.app.put('/habit/%s' % id, simplejson.dumps(habit))
         self.assertEqual(res.status_int, 200)
 
         res = self.app.get('/habit/%s' % id)
