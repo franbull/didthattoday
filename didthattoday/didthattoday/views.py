@@ -31,7 +31,7 @@ def post_habit(request):
 def summary(request):
     return {'test':'test', 'monkey':'monkey'}
 
-@view_config(route_name='habit', renderer='json', request_method='POST')
+@view_config(route_name='habit', renderer='json', request_method='PUT')
 def update_habit(request):
     id = request.matchdict['id']
     habit_dict = request.json_body

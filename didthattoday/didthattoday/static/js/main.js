@@ -1,13 +1,18 @@
 $(document).ready(function() {
     function createHabit(name, description) {
         var editing = ko.observable(false),
+            obsName = ko.observable(name),
+            obsDescription = ko.observable(description),
             toggleEditMode = function() { editing(!editing()); };
         return {
-            name: name,
-            description: description,
+            name: obsName,
+            description: obsDescription,
             editing: editing,
             toggleEditMode: toggleEditMode,
-            updateHabit: function () { toggleEditMode(); }
+            updateHabit: function () {
+                toggleEditMode();
+
+            }
         };
     }
 
