@@ -2,13 +2,12 @@ import simplejson
 
 from base import IntegrationTestBase
 from didthattoday.models import Habit
-from didthattoday.models import User
 
 class TestHabitViews(IntegrationTestBase):
     def test_habits(self):
         assert(self.session.query(Habit).count() == 0)
         habit = {'name': 'woo', 'description': 'hoo'}
-        res = self.app.post('/habit', simplejson.dumps(habit))
+        res = self.app.post('/habits', simplejson.dumps(habit))
         self.assertEqual(res.status_int, 200)
 
         res = self.app.get('/habits')
@@ -22,7 +21,7 @@ class TestHabitViews(IntegrationTestBase):
     def test_get_habit(self):
         assert(self.session.query(Habit).count() == 0)
         habit = {'name': 'woo', 'description': 'hoo'}
-        res = self.app.post('/habit', simplejson.dumps(habit))
+        res = self.app.post('/habits', simplejson.dumps(habit))
         self.assertEqual(res.status_int, 200)
 
         res = self.app.get('/habits')
@@ -43,7 +42,7 @@ class TestHabitViews(IntegrationTestBase):
     def test_update_habit(self):
         assert(self.session.query(Habit).count() == 0)
         habit = {'name': 'woo', 'description': 'hoo'}
-        res = self.app.post('/habit', simplejson.dumps(habit))
+        res = self.app.post('/habits', simplejson.dumps(habit))
         self.assertEqual(res.status_int, 200)
 
         res = self.app.get('/habits')

@@ -1,4 +1,4 @@
-from pyramid.response import Response
+from cornice.resource import resource
 from pyramid.view import view_config
 from pyramid.view import forbidden_view_config
 from pyramid.security import authenticated_userid
@@ -7,63 +7,64 @@ from pyramid.security import remember
 from pyramid.httpexceptions import HTTPFound
 from pyramid.httpexceptions import HTTPForbidden
 
-from sqlalchemy.exc import DBAPIError
-
 from .models import (
     Habit,
     User,
 )
 
-# TODO rather than write our own restful api, why not use cornice?
+
 def auth_user_id(request):
     if request.environ.get('paste.testing') and request.environ.get('unittest_user_id'):
         return request.environ.get('unittest_user_id')
     else:
         return authenticated_userid(request)
 
-@view_config(route_name='home', renderer='templates/mytemplate.pt')
-def my_view(request):
-    return {'one': 'oh no', 'project': 'didthattoday'}
 
+@resource(collection_path='/habits', path='/habit/{id}')
+class HabitResource(object):
+    def __init__(self, request):
+        self.request = request
+        self.user = User.from_id(auth_user_id(self.request))
+        # I can't think of any reason you should be able to do anything with
+        # habits without being logged in? . . . at least until they can be
+        # shared I guess? maybe those will be a different kind of habit.
+        if self.user is None:
+            self.request.errors.add(self.request.url, 'Not logged in.',
+                    'You must be logged in to access Habits.')
+        # set some variables that the methods might find handy
+        self.habit = None
+        habit_id = self.request.matchdict.get('id')
+        if habit_id is not None:
+            habits = [habit for habit in self.user.habits if str(habit.id) == habit_id]
+            if not habits:
+                self.request.errors.add(self.request.url, 'No such habit.',
+                    'There is not habit with id=%s' % habit_id)
+            elif len(habits) > 1:
+                raise Exception('The database wont let this happen.')
+            else:
+                self.habit = habits[0]
 
-@view_config(route_name='habits', renderer='json')
-def habits(request):
-    user = User.from_id(auth_user_id(request))
-    if user is None:
-        raise Exception('todo')
-    return {'habits': [h.to_json() for h in user.habits]}
+    def collection_get(self):
+        return {'habits': [h.to_json() for h in self.user.habits]}
 
+    def collection_post(self):
+        habit = Habit(**self.request.json_body)
+        self.user.habits.append(habit)
+        return habit.to_json()
 
-@view_config(route_name='add_habit', renderer='json', request_method='POST')
-def post_habit(request):
-    user = User.from_id(auth_user_id(request))
-    if user is None:
-        raise Exception('todo')
-    habit_dict = request.json_body
-    habit = Habit(**habit_dict)
-    user.habits.append(habit)
-    #Habit.Session.add(habit)
-    return habit.to_json()
+    def get(self):
+        return self.habit.to_json()
+
+    def put(self):
+        for k, v in self.request.json_body.iteritems():
+            setattr(self.habit, k, v)
+        return self.habit.to_json()
 
 
 @view_config(route_name='summary', renderer='habitforming.mako')
 def summary(request):
     return {'test':'test', 'monkey':'monkey'}
 
-@view_config(route_name='habit', renderer='json', request_method='PUT')
-def update_habit(request):
-    id = request.matchdict['id']
-    habit_dict = request.json_body
-    habit = Habit.Session.query(Habit).get(id)
-    for k, v in habit_dict.iteritems():
-        setattr(habit, k, v)
-    return habit.to_json()
-
-@view_config(route_name='habit', renderer='json', request_method='GET')
-def get_habit(request):
-    id = request.matchdict['id']
-    habit = Habit.Session.query(Habit).get(id)
-    return habit.to_json()
 
 @forbidden_view_config()
 def forbidden_view(request):
