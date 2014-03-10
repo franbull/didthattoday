@@ -22,15 +22,31 @@ from sqlalchemy.orm import (
 
 from zope.sqlalchemy import ZopeTransactionExtension
 
+
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
 Base.Session = DBSession
+
 
 def json_me(instance):
     d = {}
     for attr in instance.json_attrs:
         d[attr] = getattr(instance, attr)
     return d
+
+
+def me_update_from_json(instance, data):
+    for attr in instance.json_attrs:
+        if attr in data:
+            setattr(instance, attr, data[attr])
+    return instance
+
+
+def me_from_json(cls, data):
+    instance = cls()
+    instance = instance.update_from_json(data)
+    return instance
+
 
 class Habit(Base):
     __tablename__ = 'habits'
@@ -43,6 +59,10 @@ class Habit(Base):
     def to_json(self):
         return json_me(self)
 
+    @classmethod
+    def from_json(cls, data):
+        return me_from_json(cls, data)
+
 
 class Step(Base):
     __tablename__ = 'steps'
@@ -50,16 +70,23 @@ class Step(Base):
     comment = Column(Text)
     happened_at = Column(DateTime, default=datetime.now, nullable=False)
 
+    userid = Column(Integer, ForeignKey('users.id'), nullable=False)
     habit_id = Column(Integer, ForeignKey('habits.id'))
     habit = relationship(Habit)
 
-    json_attrs = ['id', 'comment', 'habit_id']
+    json_attrs = ['id', 'comment', 'habit_id', 'happened_at']
     def to_json(self):
         return json_me(self)
+
+    @classmethod
+    def from_json(cls, data):
+        return me_from_json(cls, data)
+
 
 def groupfinder(userid, request):
     user = User.from_id(userid)
     return [g.name for g in user.groups]
+
 
 class Group(Base):
     __tablename__ = 'groups'
@@ -78,6 +105,7 @@ class User(Base):
     password = Column(Text, nullable=False)
     groups = relationship(Group, secondary='user_group')
     habits = relationship(Habit)
+    steps = relationship(Step)
 
     def __init__(self, login, password, groups=[]):
         self.login = login
@@ -115,6 +143,7 @@ class User(Base):
         hashed_pass = sha1()
         hashed_pass.update(password + self.password[:40])
         return self.password[40:] == hashed_pass.hexdigest()
+
 
 user_group_table = Table('user_group', Base.metadata,
     Column('user_id', Integer, ForeignKey(User.id)),

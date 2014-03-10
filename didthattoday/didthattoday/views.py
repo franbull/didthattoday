@@ -9,6 +9,7 @@ from pyramid.httpexceptions import HTTPForbidden
 
 from .models import (
     Habit,
+    Step,
     User,
 )
 
@@ -60,6 +61,48 @@ class HabitResource(object):
             setattr(self.habit, k, v)
         return self.habit.to_json()
 
+
+# well so far this and HabitResource are exactly the same . . .
+@resource(collection_path='/steps', path='/step/{id}')
+class StepResource(object):
+    def __init__(self, request):
+        self.request = request
+        self.user = User.from_id(auth_user_id(self.request))
+        # I can't think of any reason you should be able to do anything with
+        # steps without being logged in? . . . at least until they can be
+        # shared I guess? maybe those will be a different kind of step.
+        if self.user is None:
+            self.request.errors.add(self.request.url, 'Not logged in.',
+                    'You must be logged in to access steps.')
+        # set some variables that the methods might find handy
+        self.step = None
+        step_id = self.request.matchdict.get('id')
+        if step_id is not None:
+            steps = [step for step in self.user.steps if str(step.id) == step_id]
+            if not steps:
+                self.request.errors.add(self.request.url, 'No such step.',
+                    'There is not step with id=%s' % step_id)
+            elif len(steps) > 1:
+                raise Exception('The database wont let this happen.')
+            else:
+                self.step = steps[0]
+
+    def collection_get(self):
+        return {'steps': [h.to_json() for h in self.user.steps]}
+
+    def collection_post(self):
+        import pdb; pdb.set_trace()
+        step = Step(**self.request.json_body)
+        self.user.steps.append(step)
+        return step.to_json()
+
+    def get(self):
+        return self.step.to_json()
+
+    def put(self):
+        for k, v in self.request.json_body.iteritems():
+            setattr(self.step, k, v)
+        return self.step.to_json()
 
 @view_config(route_name='summary', renderer='habitforming.mako')
 def summary(request):
